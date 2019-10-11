@@ -314,8 +314,13 @@ exports.get = function () {
                                     }, S.config["代码"])
                                 }
                                 setTimeout(function () {
-                                    S.heatMap();
-                                    S.event(S.config['二跳标签'], 's');
+                                    page.evaluate(function () {
+                                        console.log("可二跳点位: " + document.querySelectorAll("a").length);
+                                    });
+                                    setTimeout(function () {
+                                        S.heatMap();
+                                        S.event(S.config['二跳标签'], 's');
+                                    },2000)
                                     // S.click(S.config['二跳标签']);
                                 }, 2000);
                                 pageCount = setTimeout(function () {
@@ -327,7 +332,8 @@ exports.get = function () {
                         }
                         page.shot(15000);
                     }, S.stayValue(S.config["二跳前停留"]) * 1000)
-                } else if (indexStr2 && loadVar === 1 && _url !== url && _status && ((Date.now() - indexOfTime) / 1000) > 8) {
+                }
+                else if (indexStr2 && loadVar === 1 && _url !== url && _status && ((Date.now() - indexOfTime) / 1000) > 8) {
                     loadVar = 2;
                     _url = url, indexOfTime = Date.now();
                     page.shot(7900);
@@ -381,7 +387,9 @@ exports.get = function () {
             };
             page.onResourceRequested = S.onResourceRequested;
             page.onResourceReceived = S.onResourceReceived;
-            page.onConsoleMessage = S.onConsoleMessage;
+            page.onConsoleMessage = function(msg) {
+                console.log(msg);
+            };
             var page2;
             page.onPageCreated = S.onPageCreated;
             var _stay = 3000;
