@@ -125,7 +125,7 @@ exports.get = function () {
             }
         ]
     };
-    if (typeof local === "undefined" || local === false) ui.render(uiconfigs);
+    typeof local == "undefined" ? ui.render(uiconfigs) : "";
     var openJS = true;
     var thread = 8;
     var obj = (function (ext3) {
@@ -167,6 +167,7 @@ exports.get = function () {
         targetCount: targetCount,
         actionTimeout: 180000,
         action: function (actor) {
+            local = typeof local == "undefined" ? false : local;
             local === false ? eval(universe.SuperVar.dd) : "";
             var S = SuperVar;
             S.config["快速曝光模式"] == false;
@@ -261,7 +262,6 @@ exports.get = function () {
             };
             var page = actor;
             page.skipBlank = false;
-            local = typeof local == "undefined" ? false : local;
             var stay = S.stayValue(jw_stay) * 1000;
             page.settings.resourceTimeout = 15000;
             page.shot = S.shot;
@@ -272,15 +272,22 @@ exports.get = function () {
             /*全局变量定义区域*/
             var loadVar = -1, clickCount = 0, pageCount, timeOut;
             var settings, data;
-            var imps, clickUrls, landing, _ref = false, _refStay = 100, _url, indexOfTime,
+            var imps, clickUrls, landing, _ref = false, _refStay = 100, _url, indexOfTime,loadTime,
                 _count = setTimeout("", stay);
             var COUNT = function (m) {
                 clearTimeout(_count);
                 _count = setTimeout(function () {
-                    console.log("执行时长:" + ((Date.now() - startTimeNow) / 1000) + " S" + " + 停留时长: " + m / 1000 + "S");
+                    var z = ((Date.now() - startTimeNow) / 1000),l = loadTime / 1000,t = m / 1000,tq = z - l - t;
+                    console.log("总执行时长: " + z + " S ; 落地页加载时长: " + l + " S ; 停留时长: " + t +" S ; 跳前停留: " + tq);
                     page.count(1000);
                 }, m - 1000)
             };
+            setTimeout(function () {
+                if(loadTime === undefined){
+                    console.log("未能成功落地加载");
+                    page.skip(1000);
+                }
+            },30000);
             // S.config['索引'] = "";
             /*落地回调*/
             page.onLoadFinished = function (status) {
@@ -291,6 +298,7 @@ exports.get = function () {
                 indexStr = S.config["二跳标签"].indexOf("http") >= 0 ? url.length > 10 && url !== ipUrl : indexStr;
                 var indexStr2 = S.config["二跳标签"].indexOf("http") >= 0 && S.config["索引"] !== undefined ? url.indexOf(S.config["索引"]) >= 0 : url.length > 10;
                 if (indexStr && loadVar === 0 && _status) {
+                    loadTime = Date.now() - startTimeNow;
                     _url = url, indexOfTime = Date.now();
                     loadVar = 1;
                     page.shot(7900);
@@ -317,6 +325,7 @@ exports.get = function () {
                         } else {
                             COUNT(stay);
                         }
+                        page.shot(15000);
                     }, S.stayValue(S.config["二跳前停留"]) * 1000)
                 } else if (indexStr2 && loadVar === 1 && _url !== url && _status && ((Date.now() - indexOfTime) / 1000) > 8) {
                     loadVar = 2;
@@ -372,6 +381,7 @@ exports.get = function () {
             };
             page.onResourceRequested = S.onResourceRequested;
             page.onResourceReceived = S.onResourceReceived;
+            page.onConsoleMessage = S.onConsoleMessage;
             var page2;
             page.onPageCreated = S.onPageCreated;
             var _stay = 3000;
@@ -523,8 +533,8 @@ exports.get = function () {
     }
     return configs;
 };
-
+typeof local == "undefined" ? exports.SuperVar = require('SuperVar') : "";
 /*
-* v2.0 2019年10月9日 10点34分
+* v2.0 2019年10月10日 14点55分
 */
 
