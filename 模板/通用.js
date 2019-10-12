@@ -387,9 +387,7 @@ exports.get = function () {
             };
             page.onResourceRequested = S.onResourceRequested;
             page.onResourceReceived = S.onResourceReceived;
-            page.onConsoleMessage = function(msg) {
-                console.log(msg);
-            };
+            page.onConsoleMessage = S.onConsoleMessage;
             var page2;
             page.onPageCreated = S.onPageCreated;
             var _stay = 3000;
@@ -410,7 +408,7 @@ exports.get = function () {
                 for (var j = 1; j <= pv; j++) {
                     setTimeout(function () {
                         S.send(imps)
-                    }, ct * parseInt(Math.random() * 3000));
+                    }, 3000 + ct * parseInt(Math.random() * 1000));
                 }
             };
             /*通用回传*/
@@ -455,7 +453,7 @@ exports.get = function () {
                             }
                         } else {
                             setTimeout(function () {
-                                COUNT(1000)
+                                COUNT(3000)
                             }, _stay);
                         }
                     }, _refStay)
