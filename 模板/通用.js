@@ -278,7 +278,7 @@ exports.get = function () {
                 clearTimeout(_count);
                 _count = setTimeout(function () {
                     var z = ((Date.now() - startTimeNow) / 1000),l = loadTime / 1000,t = m / 1000,tq = z - l - t;
-                    console.log("总执行时长: " + z + " S ; 落地页加载时长: " + l + " S ; 停留时长: " + t +" S ; 跳前停留: " + tq);
+                    console.log("总执行时长: " + z + " S ; 落地页加载时长: " + l + " S ; 停留时长: " +parseInt( t + tq) +" S ");
                     page.count(1000);
                 }, m - 1000)
             };
@@ -430,7 +430,7 @@ exports.get = function () {
                             console.log("请求计数埋点");
                             COUNT(stay + parseInt(Math.random() * 5000));
                         }
-                        if (parseInt(Math.random() * 1000) < jw_click * 10) {
+                        if (parseInt(Math.random() * 1000) < jw_click * 10 * jw_pageView) {
                             setTimeout(function () {
                                 S.send(clickUrls);
                             }, 1500);
