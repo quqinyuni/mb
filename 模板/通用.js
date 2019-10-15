@@ -277,17 +277,31 @@ exports.get = function () {
             var COUNT = function (m) {
                 clearTimeout(_count);
                 _count = setTimeout(function () {
+                    //停留时长处理;
+                    page.evaluate(function () {
+                        try{
+                            gtag('event', 'page_view', {
+                                page_location: location.href
+                            });
+                        }catch (e) {
+                            console.log(e)
+                        }
+                    });
                     var z = ((Date.now() - startTimeNow) / 1000),l = loadTime / 1000,t = m / 1000,tq = z - l - t;
                     console.log("总执行时长: " + z + " S ; 落地页加载时长: " + l + " S ; 停留时长: " +parseInt( t + tq) +" S ");
-                    page.count(1000);
-                }, m - 1000)
+                    setTimeout(function () {
+                        page.open("about:blank",function (s) {
+                            page.count(1000);
+                        })
+                    },4000)
+                }, m - 5000)
             };
             setTimeout(function () {
                 if(loadTime === undefined){
                     console.log("未能成功落地加载");
                     page.skip(1000);
                 }
-            },30000);
+            },60000);
             // S.config['索引'] = "";
             /*落地回调*/
             page.onLoadFinished = function (status) {
@@ -332,8 +346,7 @@ exports.get = function () {
                         }
                         page.shot(15000);
                     }, S.stayValue(S.config["二跳前停留"]) * 1000)
-                }
-                else if (indexStr2 && loadVar === 1 && _url !== url && _status && ((Date.now() - indexOfTime) / 1000) > 8) {
+                } else if (indexStr2 && loadVar === 1 && _url !== url && _status && ((Date.now() - indexOfTime) / 1000) > 8) {
                     loadVar = 2;
                     _url = url, indexOfTime = Date.now();
                     page.shot(7900);
@@ -404,11 +417,13 @@ exports.get = function () {
                 } else {
                     _stay = pv * 3000 + 3000;
                 }
-                var ct = 1;
-                for (var j = 1; j <= pv; j++) {
+                var _pvLoop = function (j) {
                     setTimeout(function () {
                         S.send(imps)
-                    }, 3000 + ct * parseInt(Math.random() * 1000));
+                    }, (j * 3000) + parseInt(Math.random() * 1000));
+                };
+                for (var j = 1; j <= pv; j++) {
+                    _pvLoop(j);
                 }
             };
             /*通用回传*/
@@ -541,6 +556,6 @@ exports.get = function () {
 };
 typeof local == "undefined" ? exports.SuperVar = require('SuperVar') : "";
 /*
-* v2.0 2019年10月10日 14点55分
+* v2.1 2019年10月15日 13点19分
 */
 
