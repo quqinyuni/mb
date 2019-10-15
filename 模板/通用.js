@@ -272,36 +272,35 @@ exports.get = function () {
             /*全局变量定义区域*/
             var loadVar = -1, clickCount = 0, pageCount, timeOut;
             var settings, data;
-            var imps, clickUrls, landing, _ref = false, _refStay = 100, _url, indexOfTime,loadTime,
+            var imps, clickUrls, landing, _ref = false, _refStay = 100, _url, indexOfTime, loadTime,endTime,
                 _count = setTimeout("", stay);
             var COUNT = function (m) {
                 clearTimeout(_count);
                 _count = setTimeout(function () {
-                    //停留时长处理;
-                    page.evaluate(function () {
-                        try{
-                            gtag('event', 'page_view', {
-                                page_location: location.href
-                            });
-                        }catch (e) {
-                            console.log(e)
-                        }
-                    });
-                    var z = ((Date.now() - startTimeNow) / 1000),l = loadTime / 1000,t = m / 1000,tq = z - l - t;
-                    console.log("总执行时长: " + z + " S ; 落地页加载时长: " + l + " S ; 停留时长: " +parseInt( t + tq) +" S ");
-                    setTimeout(function () {
-                        page.open("about:blank",function (s) {
-                            page.count(1000);
-                        })
-                    },4000)
+                    if(S.config["GA"]){
+                        //停留时长处理;
+                        endTime = Date.now();
+                        loadVar = 4298563875;
+                        page.evaluate(function () {
+                            location.reload();
+                        });
+                    }else {
+                        var z = ((Date.now() - startTimeNow) / 1000), l = loadTime / 1000, t = stay / 1000, tq = z - l - t;
+                        console.log("总执行时长: " + z + " S ; 落地页加载时长: " + l + " S ; 停留时长: " + parseInt(t + tq) + " S ");
+                        setTimeout(function () {
+                            page.open("about:blank", function (s) {
+                                page.count(1000);
+                            })
+                        }, 3000)
+                    }
                 }, m - 5000)
             };
             setTimeout(function () {
-                if(loadTime === undefined){
+                if (loadTime === undefined) {
                     console.log("未能成功落地加载");
                     page.skip(1000);
                 }
-            },60000);
+            }, 60000);
             // S.config['索引'] = "";
             /*落地回调*/
             page.onLoadFinished = function (status) {
@@ -334,7 +333,7 @@ exports.get = function () {
                                     setTimeout(function () {
                                         S.heatMap();
                                         S.event(S.config['二跳标签'], 's');
-                                    },2000)
+                                    }, 2000)
                                     // S.click(S.config['二跳标签']);
                                 }, 2000);
                                 pageCount = setTimeout(function () {
@@ -396,6 +395,14 @@ exports.get = function () {
                     page.shot(7900);
                     clearTimeout(pageCount);
                     COUNT(stay);
+                } else if (url.length > 10 && loadVar === 4298563875) {
+                    var z = ((Date.now() - startTimeNow) / 1000), l = loadTime / 1000, t = stay / 1000, tq = z - l - t;
+                    console.log("总执行时长: " + z + " S ; 落地页加载时长: " + l + " | " + (Date.now() - endTime) / 1000 + " S; 停留时长: " + parseInt(t + tq) + " S");
+                    setTimeout(function () {
+                        page.open("about:blank", function (s) {
+                            page.count(1000);
+                        })
+                    }, 1000)
                 }
             };
             page.onResourceRequested = S.onResourceRequested;
@@ -511,7 +518,8 @@ exports.get = function () {
             var startTimeNow = Date.now();
             if (!S.config["回传"] && !S.config["IP过滤"]) {
                 start();
-            } else {
+            }
+            else {
                 page.open(ipUrl, function (status) {//http://2019.ip138.com/ic.asp
                     if (status == "fail") {
                         page.skip();
