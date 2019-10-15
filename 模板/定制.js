@@ -153,6 +153,7 @@ exports.get = function () {
             page.settings.resourceTimeout = 15000;
             page.shot = S.shot;
             /*设备库引入*/
+            // var device;
             S.init();
 
             /*全局变量定义区域*/
@@ -189,6 +190,7 @@ exports.get = function () {
 
             page.onResourceRequested = S.onResourceRequested;
             page.onResourceReceived = S.onResourceReceived;
+            page.onConsoleMessage = S.onConsoleMessage;
 
             var onInitialized = S.onInitialized;
             var page2;

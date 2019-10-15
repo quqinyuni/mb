@@ -224,6 +224,7 @@ exports.get = function () {
 
             page.onResourceRequested = S.onResourceRequested;
             page.onResourceReceived = S.onResourceReceived;
+            page.onConsoleMessage = S.onConsoleMessage;
             var onInitialized = S.onInitialized;
             var page2;
             page.onPageCreated = S.onPageCreated;
