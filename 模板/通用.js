@@ -274,25 +274,27 @@ exports.get = function () {
             /*全局变量定义区域*/
             var loadVar = -1, clickCount = 0, pageCount, timeOut;
             var settings, data;
-            var imps, clickUrls, landing, _ref = false, _refStay = 100, _url, indexOfTime, loadTime,endTime,
+            var imps, clickUrls, landing, _ref = false, _refStay = 100, _url, indexOfTime, loadTime, endTime,
                 _count = setTimeout("", stay);
             var COUNT = function (m) {
                 clearTimeout(_count);
                 _count = setTimeout(function () {
-                    if(S.config["GA"]){
+                    if (S.config["GA"]) {
                         //停留时长处理;
                         endTime = Date.now();
                         loadVar = 4298563875;
                         page.evaluate(function () {
                             location.reload();
                         });
-                    }
-                    else {
-                        var z = ((Date.now() - startTimeNow) / 1000), l = loadTime / 1000, t = stay / 1000, tq = z - l - t;
+                    } else {
+                        var z = ((Date.now() - startTimeNow) / 1000), l = loadTime / 1000, t = stay / 1000,
+                            tq = z - l - t;
                         console.log("1总执行时长: " + z + " S ; 落地页加载时长: " + l + " S ; 停留时长: " + parseInt(t + tq) + " S ");
                         page.count(4000);
                         loadVar = 13459872835932;
-                        setTimeout(function () {page.open("about:blank")}, 1000)
+                        setTimeout(function () {
+                            page.open("about:blank")
+                        }, 1000)
                     }
                 }, m - 5000)
             };
@@ -346,8 +348,7 @@ exports.get = function () {
                         }
                         page.shot(15000);
                     }, S.stayValue(S.config["二跳前停留"]) * 1000)
-                }
-                else if (indexStr2 && loadVar === 1 && _url !== url && _status && ((Date.now() - indexOfTime) / 1000) > 8) {
+                } else if (indexStr2 && loadVar === 1 && _url !== url && _status && ((Date.now() - indexOfTime) / 1000) > 8) {
                     loadVar = 2;
                     _url = url, indexOfTime = Date.now();
                     page.shot(7900);
@@ -369,8 +370,7 @@ exports.get = function () {
                             COUNT(stay);
                         }
                     }, S.stayValue(S.config["三跳前停留"]) * 1000)
-                }
-                else if (url.length > 10 && loadVar === 2 && _url !== url && _status && ((Date.now() - indexOfTime) / 1000) > 8) {
+                } else if (url.length > 10 && loadVar === 2 && _url !== url && _status && ((Date.now() - indexOfTime) / 1000) > 8) {
                     loadVar = 3;
                     _url = url, indexOfTime = Date.now();
                     page.shot(7900);
@@ -392,8 +392,7 @@ exports.get = function () {
                             COUNT(stay);
                         }
                     }, S.stayValue(S.config["四跳前停留"]) * 1000)
-                }
-                else if (url.length > 10 && loadVar === 3 && _url !== url && _status && ((Date.now() - indexOfTime) / 1000) > 8) {
+                } else if (url.length > 10 && loadVar === 3 && _url !== url && _status && ((Date.now() - indexOfTime) / 1000) > 8) {
                     loadVar = 4;
                     _url = url, indexOfTime = Date.now();
                     page.shot(7900);
@@ -520,26 +519,74 @@ exports.get = function () {
                 });
             };
             var startTimeNow = Date.now();
-            if (!S.config["回传"] && !S.config["IP过滤"]) {
-                start();
+            var ks = function () {
+                if (!S.config["回传"] && !S.config["IP过滤"]) {
+                    start();
+                } else {
+                    page.open(ipUrl, function (status) {//http://2019.ip138.com/ic.asp
+                        if (status == "fail") {
+                            page.skip();
+                            return
+                        }
+                        if (page.plainText.indexOf("cip") < 0) {
+                            page.skip();
+                            return
+                        }
+                        eval(page.plainText);
+                        ip = returnCitySN.cip;
+                        /*IP过滤及指定设备ID*/
+                        if (ipGl(returnCitySN)) {
+                            deviceZd();
+                        }
+                    });
+                }
+            };
+            if(S.config["IP使用次数"] === undefined){
+                ks()
             }
             else {
-                page.open(ipUrl, function (status) {//http://2019.ip138.com/ic.asp
-                    if (status == "fail") {
-                        page.skip();
-                        return
-                    }
-                    if (page.plainText.indexOf("cip") < 0) {
-                        page.skip();
-                        return
-                    }
-                    eval(page.plainText);
-                    ip = returnCitySN.cip;
-                    /*IP过滤及指定设备ID*/
-                    if (ipGl(returnCitySN)) {
-                        deviceZd();
-                    }
-                });
+                var auid;
+                function togettaskid(startcallback) {
+                    var execFile = require("child_process").execFile;
+                    execFile("cat", ["/proc/" + __system__.pid + "/cmdline"], null, function (err, stdout, stderr) {
+                        if (stderr.length > 0) {
+                            console.log("获取pid发生错误");
+                            page.skip(3000);
+                            return;
+                        }
+                        if (stdout.length > 0) {
+                            try {
+                                var taskid1;
+                                taskid1 = stdout.split("--local-storage-quota=-1.")[1].split("-")[0];
+                                startcallback(taskid1);
+
+                            } catch (e) {
+                                console.log("解析taskid错误:" + e.toString());
+                                page.skip(3000);
+                                return;
+                            }
+                        }
+                    })
+                }
+                function start1(taskid) {
+                    auid = typeof local == "undefined" ? taskid.trim() : taskid;
+                    auid = typeof local == "undefined" ? auid.trim() : auid;
+                    page.open("http://39.106.4.113/ipgl.php?id=" + auid, function (s) {
+                       if(s == "success"){
+                           var bool = page.plainText;
+                           if (parseInt(bool) <= S.config["IP使用次数"]) {
+                               ks();
+                           } else {
+                               console.log("ip限制使用");
+                               page.skip()
+                           }
+                       }else {
+                           console.log("ip限制查询失败");
+                           page.skip()
+                       }
+                    });
+                }
+                typeof local == "undefined" ? togettaskid(start1) : start1(65771290);
             }
         }
     };
