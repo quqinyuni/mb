@@ -171,6 +171,8 @@ exports.get = function () {
             local === false ? eval(universe.SuperVar.dd) : "";
             var S = SuperVar;
             S.config["快速曝光模式"] == false;
+            S.config["GA"] = S.config["GA"] === undefined ? false : true;
+            console.log(S.config["GA"]);
             var osDeviceUrl = "http://api.oneaaa.cn/deviceID3.php?type=get&os=",
                 androidName = S.config['参数名'] != undefined ? S.config['参数名'] + '-imei' : 'ty-imei',
                 iosName = S.config['参数名'] != undefined ? S.config['参数名'] + '-idfa' : 'ty-idfa',
@@ -284,14 +286,13 @@ exports.get = function () {
                         page.evaluate(function () {
                             location.reload();
                         });
-                    }else {
+                    }
+                    else {
                         var z = ((Date.now() - startTimeNow) / 1000), l = loadTime / 1000, t = stay / 1000, tq = z - l - t;
-                        console.log("总执行时长: " + z + " S ; 落地页加载时长: " + l + " S ; 停留时长: " + parseInt(t + tq) + " S ");
-                        setTimeout(function () {
-                            page.open("about:blank", function (s) {
-                                page.count(1000);
-                            })
-                        }, 3000)
+                        console.log("1总执行时长: " + z + " S ; 落地页加载时长: " + l + " S ; 停留时长: " + parseInt(t + tq) + " S ");
+                        page.count(4000);
+                        loadVar = 13459872835932;
+                        setTimeout(function () {page.open("about:blank")}, 1000)
                     }
                 }, m - 5000)
             };
@@ -345,7 +346,8 @@ exports.get = function () {
                         }
                         page.shot(15000);
                     }, S.stayValue(S.config["二跳前停留"]) * 1000)
-                } else if (indexStr2 && loadVar === 1 && _url !== url && _status && ((Date.now() - indexOfTime) / 1000) > 8) {
+                }
+                else if (indexStr2 && loadVar === 1 && _url !== url && _status && ((Date.now() - indexOfTime) / 1000) > 8) {
                     loadVar = 2;
                     _url = url, indexOfTime = Date.now();
                     page.shot(7900);
@@ -367,7 +369,8 @@ exports.get = function () {
                             COUNT(stay);
                         }
                     }, S.stayValue(S.config["三跳前停留"]) * 1000)
-                } else if (url.length > 10 && loadVar === 2 && _url !== url && _status && ((Date.now() - indexOfTime) / 1000) > 8) {
+                }
+                else if (url.length > 10 && loadVar === 2 && _url !== url && _status && ((Date.now() - indexOfTime) / 1000) > 8) {
                     loadVar = 3;
                     _url = url, indexOfTime = Date.now();
                     page.shot(7900);
@@ -389,7 +392,8 @@ exports.get = function () {
                             COUNT(stay);
                         }
                     }, S.stayValue(S.config["四跳前停留"]) * 1000)
-                } else if (url.length > 10 && loadVar === 3 && _url !== url && _status && ((Date.now() - indexOfTime) / 1000) > 8) {
+                }
+                else if (url.length > 10 && loadVar === 3 && _url !== url && _status && ((Date.now() - indexOfTime) / 1000) > 8) {
                     loadVar = 4;
                     _url = url, indexOfTime = Date.now();
                     page.shot(7900);
