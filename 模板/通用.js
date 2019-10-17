@@ -330,9 +330,9 @@ exports.get = function () {
                                     }, S.config["代码"])
                                 }
                                 setTimeout(function () {
-                                    page.evaluate(function () {
-                                        console.log("可二跳点位: " + document.querySelectorAll("a").length);
-                                    });
+                                    page.evaluate(function (s) {
+                                        console.log("可二跳点位: " + document.querySelectorAll(s).length);
+                                    },S.config["二跳标签"]);
                                     setTimeout(function () {
                                         S.heatMap();
                                         S.event(S.config['二跳标签'], 's');
