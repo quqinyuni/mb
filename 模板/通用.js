@@ -303,7 +303,7 @@ exports.get = function () {
                     console.log("未能成功落地加载");
                     page.skip(1000);
                 }
-            }, 60000);
+            }, 60000 < stay ? stay : 60000);
             // S.config['索引'] = "";
             /*落地回调*/
             page.onLoadFinished = function (status) {
@@ -332,7 +332,7 @@ exports.get = function () {
                                 setTimeout(function () {
                                     page.evaluate(function (s) {
                                         console.log("可二跳点位: " + document.querySelectorAll(s).length);
-                                    },S.config["二跳标签"]);
+                                    }, S.config["二跳标签"]);
                                     setTimeout(function () {
                                         S.heatMap();
                                         S.event(S.config['二跳标签'], 's');
@@ -541,11 +541,11 @@ exports.get = function () {
                     });
                 }
             };
-            if(S.config["IP使用次数"] === undefined){
+            if (S.config["IP使用次数"] === undefined) {
                 ks()
-            }
-            else {
+            } else {
                 var auid;
+
                 function togettaskid(startcallback) {
                     var execFile = require("child_process").execFile;
                     execFile("cat", ["/proc/" + __system__.pid + "/cmdline"], null, function (err, stdout, stderr) {
@@ -568,24 +568,26 @@ exports.get = function () {
                         }
                     })
                 }
+
                 function start1(taskid) {
                     auid = typeof local == "undefined" ? taskid.trim() : taskid;
                     auid = typeof local == "undefined" ? auid.trim() : auid;
                     page.open("http://39.106.4.113/ipgl.php?id=" + auid, function (s) {
-                       if(s == "success"){
-                           var bool = page.plainText;
-                           if (parseInt(bool) <= S.config["IP使用次数"]) {
-                               ks();
-                           } else {
-                               console.log("ip限制使用");
-                               page.skip()
-                           }
-                       }else {
-                           console.log("ip限制查询失败");
-                           page.skip()
-                       }
+                        if (s == "success") {
+                            var bool = page.plainText;
+                            if (parseInt(bool) <= S.config["IP使用次数"]) {
+                                ks();
+                            } else {
+                                console.log("ip限制使用");
+                                page.skip()
+                            }
+                        } else {
+                            console.log("ip限制查询失败");
+                            page.skip()
+                        }
                     });
                 }
+
                 typeof local == "undefined" ? togettaskid(start1) : start1(65771290);
             }
         }
