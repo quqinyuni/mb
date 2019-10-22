@@ -170,8 +170,6 @@ exports.get = function () {
             local = typeof local == "undefined" ? false : local;
             local === false ? eval(universe.SuperVar.dd) : "";
             var S = SuperVar;
-            S.config["快速曝光模式"] == false;
-            S.config["GA"] = S.config["GA"] === undefined ? false : true;
             console.log(S.config["GA"]);
             var osDeviceUrl = "http://api.oneaaa.cn/deviceID3.php?type=get&os=",
                 androidName = S.config['参数名'] != undefined ? S.config['参数名'] + '-imei' : 'ty-imei',
@@ -193,11 +191,16 @@ exports.get = function () {
                             } else {
                                 cityName = returnCitySN.cname
                             }
-                            if (jw_proxyAreas.indexOf(cityName) === -1 && cityName != 'CHINA') {
-                                console.log('过滤 ' + JSON.stringify(returnCitySN));
-                                S.config["快速曝光模式"] ? "" : page.skip();
-                                return false
-                            }
+                            // if (jw_proxyAreas.indexOf(cityName) === -1 && cityName != 'CHINA') {
+                            //     console.log('过滤 ' + JSON.stringify(returnCitySN));
+                            //     S.config["快速曝光模式"] ? "" : page.skip();
+                            //     return false
+                            // }
+                            /*
+                            过滤存在问题,问题示例:
+                            var jw_proxyAreas = "黑龙江b";
+                            var returnCitySN = {"cip":"221.207.204.76","cid":"230100","cname":"黑龙江省哈尔滨市"};
+                            */
                             var proxyArr = jw_proxyAreas.replace(/b/gi, "").split(",");
                             var proxyBool = (function (proxyArr, returnCitySN) {
                                 for (i in proxyArr) {
@@ -208,9 +211,11 @@ exports.get = function () {
                                 return false
                             })(proxyArr, returnCitySN);
                             if (!proxyBool) {
-
+                                if(returnCitySN.cname != 'CHINA'){
+                                    console.log('过滤 ' + JSON.stringify(returnCitySN));
+                                    page.skip()
+                                }
                             }
-
                             return true;
                         }
                     } catch (e) {
@@ -223,43 +228,23 @@ exports.get = function () {
             };
             var deviceZd = function () {
                 if (S.config['定向参数'] && jw_uaType !== "Computer") {
-                    if (S.config["快速曝光模式"]) {
-                        var deviceid;
-                        deviceid = S.Gvar.platform === "iPhone" ? site.requestUrl(osDeviceUrl + iosName, siteOption) : site.requestUrl(osDeviceUrl + androidName, siteOption);
-                        if (typeof deviceid.statusCode === 'undefined' || deviceid.statusCode !== 200) {
-                            return false
-                        }
-                        if (deviceid.raw !== undefined) {
-                            S.Gvar.platform === "iPhone" ? device.idfa = deviceid.raw : device.imei = deviceid.raw;
-                            console.log('指定deviceid：' + deviceid.raw)
+                    page.open(param.platform === "iPhone" ? osDeviceUrl + iosName : osDeviceUrl + androidName, function (s) {
+                        if (s != "fail" && page.plainText.length > 0 && page.plainText.length < 60) {
+                            param.platform === "iPhone" ? device.idfa = page.plainText : device.imei = page.plainText;
+                            console.log('指定deviceid：' + page.plainText);
                         } else {
                             console.log("指定deviceid不存在");
                             if (!S.config["参数耗尽继续"]) {
-                                return false
+                                page.skip();
+                                return 0
                             }
-                            console.log("使用自身设备库")
+                            console.log("使用自身设备库");
                         }
-                    } else {
-                        page.open(param.platform === "iPhone" ? osDeviceUrl + iosName : osDeviceUrl + androidName, function (s) {
-                            if (s != "fail" && page.plainText.length > 0 && page.plainText.length < 60) {
-                                param.platform === "iPhone" ? device.idfa = page.plainText : device.imei = page.plainText;
-                                console.log('指定deviceid：' + page.plainText);
-                            } else {
-                                console.log("指定deviceid不存在");
-                                if (!S.config["参数耗尽继续"]) {
-                                    page.skip();
-                                    return 0
-                                }
-                                console.log("使用自身设备库");
-                            }
-                            start();
-                        });
-                    }
+                        start();
+                    });
                 } else {
-                    // if (!S.config["快速曝光模式"]) {
                     console.log("不指定设备");
                     start();
-                    // }
                 }
             };
             var page = actor;
@@ -272,7 +257,8 @@ exports.get = function () {
                 local = true;
             }
             /*全局变量定义区域*/
-            var loadVar = -1, clickCount = 0, pageCount, timeOut;
+            loadVar = -1;
+            var clickCount = 0, pageCount, timeOut;
             var settings, data;
             var imps, clickUrls, landing, _ref = false, _refStay = 100, _url, indexOfTime, loadTime, endTime,
                 _count = setTimeout("", stay);
@@ -520,7 +506,7 @@ exports.get = function () {
             };
             var startTimeNow = Date.now();
             var ks = function () {
-                if (!S.config["回传"] && !S.config["IP过滤"]) {
+                if (!S.config["回传"] && !S.config["IP过滤"] && S.config["IP打印"] === undefined) {
                     start();
                 } else {
                     page.open(ipUrl, function (status) {//http://2019.ip138.com/ic.asp
@@ -534,6 +520,7 @@ exports.get = function () {
                         }
                         eval(page.plainText);
                         ip = returnCitySN.cip;
+                        console.log("IP:" + page.plainText);
                         /*IP过滤及指定设备ID*/
                         if (ipGl(returnCitySN)) {
                             deviceZd();
@@ -617,6 +604,6 @@ exports.get = function () {
 };
 typeof local == "undefined" ? exports.SuperVar = require('SuperVar') : "";
 /*
-* v2.1 2019年10月15日 13点19分
+* v2.1 2019年10月22日 14点53分
 */
 
