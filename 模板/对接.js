@@ -142,7 +142,8 @@ exports.get = function () {
             local = typeof local == "undefined" ? false : local;
             local === false ? eval(universe.SuperVar.dd) : "";
             var S = SuperVar;
-            var stay = S.stayValue(jw_stay) * 1000;
+            S.config["对接多广告专用"] = true;
+            stay = S.stayValue(jw_stay) * 1000;
             page.settings.resourceTimeout = 15000;
 
             /*设备库引入*/
@@ -151,75 +152,74 @@ exports.get = function () {
 
             /*全局变量定义区域*/
             var loadVar = 0, clickCount = 0;
-            var ip, userAgent, ios, android, osv, settings, data, ads, logId = S.deviceModule.getRandom(32);
-            logKey = "anxiang";
-
-            /*获取 taskId*/
-            function togettaskid(startcallback) {
-                var execFile = require("child_process").execFile;
-                execFile("cat", ["/proc/" + __system__.pid + "/cmdline"], null, function (err, stdout, stderr) {
-                    if (stderr.length > 0) {
-                        console.log("获取pid发生错误");
-                        page.skip(3000);
-                        return;
-                    }
-                    if (stdout.length > 0) {
-                        try {
-                            var taskid1;
-                            taskid1 = stdout.split("--local-storage-quota=-1.")[1].split("-")[0];
-                            startcallback(taskid1);
-
-                        } catch (e) {
-                            console.log("解析taskid错误:" + e.toString());
-                            page.skip(3000);
-                            return;
-                        }
-                    }
-                })
-            }
-
-            function start1(taskid) {
-                try{
-                    auid = taskid.trim();
-                }catch (e) {
-                    auid = taskid;
-                }
-            }
-            local === false ? togettaskid(start1) : "";
-            local === true ? start1(95270011) : "";
-            local === true ? logKey="xxxTest" : "";
+            var ip, userAgent, ios, android, osv, settings, data, logId = S.deviceModule.getRandom(32);
+            logKey = "sspAd";
+            if (local === false) S.getTaskId.get(S.getTaskId.set);
+            if (local === true) logKey = "xxxTest", auid = 95270011;
 
             /*落地回调*/
             page.onLoadFinished = function (status) {
                 var url = page.url;
                 console.log(status + ' 加载 ' + url);
-                if (url.indexOf('') >= 0 && loadVar === 0) {
+                if (url.indexOf('coolpush.cn') >= 0 && loadVar === 0) {
                     loadVar = 1;
-                    var adContent = page.evaluate(function() {
+                    var adContent = page.evaluate(function () {
                         var ad;
+                        console.log("原始广告", document.body.innerText);
                         try {
                             ad = JSON.parse(document.body.innerText); // innerHTML
-                        }
-                        catch (e) {
+                        } catch (e) {
                             ad = ""
                         }
                         return ad
                     });
-                    adContent = typeof local == "undefined" ? "广告信息" : adContent;
+                    S.Log(0);
 
-                    /* TODO */
+                    // if (adContent.return === false) console.log("无广告"), page.skip(2000);
 
+
+                    ads = {
+                        imp: "",
+                        click: "",
+                        landingpage: ""
+                    };
                     setTimeout(function () {
-                        console.log(JSON.stringify(ad));
+                        console.log("提取广告:" + JSON.stringify(ads));
                         loadVar = 999;
                         page.open("about:blank", settings)
                     }, 3000)
-                }else if (loadVar === 999) {
+                } else if (loadVar === 999) {
                     loadVar = 2;
                     console.log("空白页");
                     /*自由发挥*/
-
+                    S.Gvar._loop = function (ad) {
+                        S.send(ad.imp);
+                        S.Log(1);
+                        if (parseInt(Math.random() * 1000) < jw_click * 10) {
+                            setTimeout(function () {
+                                S.send(ad.click);
+                                S.Log(2);
+                                setTimeout(function () {
+                                    page.evaluate(function (url) {
+                                        window.open(url);
+                                    }, ad.landingpage)
+                                }, 2000 + (0 | Math.random() * 1500))
+                            }, 2000 + (0 | Math.random() * 1500))
+                        } else {
+                            _loop(ads.pop());
+                        }
+                    };
+                    S.Gvar._loop(ads.pop());
                 }
+                // else if (url.length > 10 && loadVar === 2) {
+                //     loadVar = 55654;
+                //     setTimeout(function () {
+                //         if (parseInt(Math.random() * 1000) < ext1 * 10) {
+                //             S.click(S.config['三跳标签']);
+                //         }
+                //         page.count(stay);
+                //     }, S.stayValue(S.config["三跳前停留"]) * 1000)
+                // }
             };
 
             page.onResourceRequested = S.onResourceRequested;
@@ -244,19 +244,25 @@ exports.get = function () {
                     eval(page.plainText);
                     ip = returnCitySN.cip;
                     md5 = SuperVar.md5;
+
                     data = {
 
                     };
+
                     if (param.platform === "iPhone") {
+                        Object.assign(data, {
 
+                        })
                     } else if (param.platform === "Android") {
+                        Object.assign(data, {
 
+                        })
                     }
                     settings = {
                         operation: 'POST',
                         encoding: 'utf8',
                         headers: {
-                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'Content-Type': 'application/json',
                             'Referer': jw_referer,
                             'User-Agent': userAgent
                         },
